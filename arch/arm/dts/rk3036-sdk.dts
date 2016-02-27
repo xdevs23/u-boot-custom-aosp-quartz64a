@@ -49,6 +49,10 @@
 	};
 };
 
+&efuse {
+	status = "okay";
+};
+
 &usb_host {
 	vbus-supply = <&vcc5v0_host>;
 	status = "okay";
