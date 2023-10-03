@@ -109,3 +109,15 @@ __pycache__
 
 # moveconfig database
 /moveconfig.db
+
+/include/autoconf.mk
+/include/autoconf.mk.dep
+/include/config.h
+/*.mkimage-rockchip-tpl
+/*.mkimage-u-boot-spl
+/simple-bin-spi.map
+/*.fit.fit
+/*.itb
+/simple-bin.map
+/tools/generated/
+
