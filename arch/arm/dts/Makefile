@@ -171,12 +171,17 @@ dtb-$(CONFIG_ROCKCHIP_RK3399) += \
 
 dtb-$(CONFIG_ROCKCHIP_RK3568) += \
 	rk3566-anbernic-rgxx3.dtb \
+	rk3566-pinenote-v1.1.dts \
+	rk3566-pinenote-v1.2.dts \
+	rk3566-pinetab2-v0.1.dtb \
+	rk3566-pinetab2-v2.0.dtb \
 	rk3566-quartz64-a.dtb \
 	rk3566-quartz64-b.dtb \
 	rk3566-radxa-cm3-io.dtb \
 	rk3566-soquartz-blade.dtb \
 	rk3566-soquartz-cm4.dtb \
 	rk3566-soquartz-model-a.dtb \
+	rk3566-orangepi-3b.dtb \
 	rk3568-evb.dtb \
 	rk3568-lubancat-2.dtb \
 	rk3568-nanopi-r5c.dtb \
