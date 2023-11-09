@@ -155,12 +155,61 @@ static void serial_find_console_or_panic(void)
 }
 #endif /* CONFIG_SERIAL_PRESENT */
 
+/**
+ * check_valid_baudrate() - Check whether baudrate is valid or not
+ *
+ * @baud: baud rate to check
+ * Return: 0 if OK, -ve on error
+ */
+static int check_valid_baudrate(int baud)
+{
+	int i;
+
+	for (i = 0; i < ARRAY_SIZE(baudrate_table); ++i) {
+		if (baud == baudrate_table[i])
+			return 0;
+	}
+
+	return -EINVAL;
+}
+
+int fetch_baud_from_dtb(void)
+{
+	int baud_value, ret;
+
+	baud_value = ofnode_read_baud();
+	ret = check_valid_baudrate(baud_value);
+	if (ret)
+		return ret;
+
+	return baud_value;
+}
+
 /* Called prior to relocation */
 int serial_init(void)
 {
 #if CONFIG_IS_ENABLED(SERIAL_PRESENT)
 	serial_find_console_or_panic();
 	gd->flags |= GD_FLG_SERIAL_READY;
+
+	if (IS_ENABLED(CONFIG_OF_SERIAL_BAUD)) {
+		int ret = 0;
+		char *ptr = (char*)&default_environment[0];
+
+		/*
+		 * Fetch the baudrate from the dtb and update the value in the
+		 * default environment.
+		 */
+		ret = fetch_baud_from_dtb();
+		if (ret != -EINVAL && ret != -EFAULT) {
+			gd->baudrate = ret;
+
+			while (*ptr != '\0' && *(ptr + 1) != '\0')
+				ptr++;
+			ptr += 2;
+			sprintf(ptr, "baudrate=%d", gd->baudrate);
+		}
+	}
 	serial_setbrg();
 #endif
 
@@ -182,6 +231,16 @@ int serial_initialize(void)
 	return serial_init();
 }
 
+static void _serial_flush(struct udevice *dev)
+{
+	struct dm_serial_ops *ops = serial_get_ops(dev);
+
+	if (!ops->pending)
+		return;
+	while (ops->pending(dev, false) > 0)
+		;
+}
+
 static void _serial_putc(struct udevice *dev, char ch)
 {
 	struct dm_serial_ops *ops = serial_get_ops(dev);
@@ -193,6 +252,9 @@ static void _serial_putc(struct udevice *dev, char ch)
 	do {
 		err = ops->putc(dev, ch);
 	} while (err == -EAGAIN);
+
+	if (IS_ENABLED(CONFIG_CONSOLE_FLUSH_ON_NEWLINE) && ch == '\n')
+		_serial_flush(dev);
 }
 
 static int __serial_puts(struct udevice *dev, const char *str, size_t len)
@@ -231,21 +293,12 @@ static void _serial_puts(struct udevice *dev, const char *str)
 		if (*newline && __serial_puts(dev, "\r\n", 2))
 			return;
 
+		if (IS_ENABLED(CONFIG_CONSOLE_FLUSH_ON_NEWLINE) && *newline)
+			_serial_flush(dev);
+
 		str += len + !!*newline;
 	} while (*str);
 }
-
-#ifdef CONFIG_CONSOLE_FLUSH_SUPPORT
-static void _serial_flush(struct udevice *dev)
-{
-	struct dm_serial_ops *ops = serial_get_ops(dev);
-
-	if (!ops->pending)
-		return;
-	while (ops->pending(dev, false) > 0)
-		;
-}
-#endif
 
 static int __serial_getc(struct udevice *dev)
 {
@@ -520,7 +573,7 @@ static int serial_post_probe(struct udevice *dev)
 		return 0;
 	memset(&sdev, '\0', sizeof(sdev));
 
-	strncpy(sdev.name, dev->name, sizeof(sdev.name));
+	strlcpy(sdev.name, dev->name, sizeof(sdev.name));
 	sdev.flags = DEV_FLAGS_OUTPUT | DEV_FLAGS_INPUT | DEV_FLAGS_DM;
 	sdev.priv = dev;
 	sdev.putc = serial_stub_putc;

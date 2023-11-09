@@ -161,6 +161,7 @@ F:	drivers/net/phy/meson-gxl.c
 F:	drivers/adc/meson-saradc.c
 F:	drivers/phy/meson*
 F:	drivers/mmc/meson_gx_mmc.c
+F:	drivers/sm/meson-sm.c
 F:	drivers/spi/meson_spifc.c
 F:	drivers/pinctrl/meson/
 F:	drivers/power/domain/meson-gx-pwrc-vpu.c
@@ -299,7 +300,9 @@ F:	arch/arm/include/asm/arch-vf610/
 F:	arch/arm/include/asm/mach-imx/
 F:	board/freescale/*mx*/
 F:	board/freescale/common/
+F:	common/spl/spl_imx_container.c
 F:	drivers/serial/serial_mxc.c
+F:	include/imx_container.h
 
 ARM HISILICON
 M:	Peter Griffin <peter.griffin@linaro.org>
@@ -564,7 +567,9 @@ S:	Supported
 F:	arch/arm/dts/am335x-sancloud*
 
 ARM SNAPDRAGON
-M:	Ramon Fried <rfried.dev@gmail.com>
+M:	Caleb Connolly <caleb.connolly@linaro.org>
+M:	Neil Armstrong <neil.armstrong@linaro.org>
+R:	Sumit Garg <sumit.garg@linaro.org>
 S:	Maintained
 F:	arch/arm/mach-snapdragon/
 F:	drivers/gpio/msm_gpio.c
@@ -622,7 +627,7 @@ F:	drivers/ram/stm32mp1/
 F:	drivers/remoteproc/stm32_copro.c
 F:	drivers/reset/stm32-reset.c
 F:	drivers/rng/optee_rng.c
-F:	drivers/rng/stm32mp1_rng.c
+F:	drivers/rng/stm32_rng.c
 F:	drivers/rtc/stm32_rtc.c
 F:	drivers/serial/serial_stm32.*
 F:	drivers/spi/stm32_qspi.c
@@ -945,6 +950,7 @@ F:	include/cyclic.h
 
 DFU
 M:	Lukasz Majewski <lukma@denx.de>
+M:	Mattijs Korpershoek <mkorpershoek@baylibre.com>
 S:	Maintained
 T:	git https://source.denx.de/u-boot/custodians/u-boot-dfu.git
 F:	cmd/dfu.c
@@ -1051,7 +1057,8 @@ F:	test/common/event.c
 F:	test/py/tests/test_event_dump.py
 
 FASTBOOT
-S:	Orphaned
+M:	Mattijs Korpershoek <mkorpershoek@baylibre.com>
+S:	Maintained
 F:	cmd/fastboot.c
 F:	doc/android/fastboot*.rst
 F:	include/fastboot.h
@@ -1548,7 +1555,6 @@ F:	arch/arm/mach-omap2/omap5/sec_entry_cpu1.S
 F:	arch/arm/mach-omap2/sec-common.c
 F:	arch/arm/mach-omap2/config_secure.mk
 F:	arch/arm/mach-k3/security.c
-F:	arch/arm/mach-k3/config_secure.mk
 F:	configs/am335x_hs_evm_defconfig
 F:	configs/am335x_hs_evm_uart_defconfig
 F:	configs/am43xx_hs_evm_defconfig
@@ -1561,8 +1567,6 @@ F:	configs/k2hk_hs_evm_defconfig
 F:	configs/k2e_hs_evm_defconfig
 F:	configs/k2g_hs_evm_defconfig
 F:	configs/k2l_hs_evm_defconfig
-F:	configs/am65x_hs_evm_r5_defconfig
-F:	configs/am65x_hs_evm_a53_defconfig
 
 TPM DRIVERS
 M:	Ilias Apalodimas <ilias.apalodimas@linaro.org>

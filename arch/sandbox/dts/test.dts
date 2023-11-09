@@ -9,6 +9,7 @@
 
 /dts-v1/;
 
+#include <config.h>
 #include <dt-bindings/gpio/gpio.h>
 #include <dt-bindings/gpio/sandbox-gpio.h>
 #include <dt-bindings/input/input.h>
@@ -41,6 +42,7 @@
 		mmc3 = "/mmc3";
 		mmc4 = "/mmc4";
 		mmc5 = "/mmc5";
+		mmc6 = "/mmc6";
 		pci0 = &pci0;
 		pci1 = &pci1;
 		pci2 = &pci2;
@@ -66,6 +68,17 @@
 		usb2 = &usb_2;
 		axi0 = &axi;
 		osd0 = "/osd";
+	};
+
+	reserved-memory {
+		#address-cells = <1>;
+		#size-cells = <1>;
+		ranges;
+
+		event_log: tcg_event_log {
+			no-map;
+			reg = <(CFG_SYS_SDRAM_SIZE - 0x2000) 0x2000>;
+		};
 	};
 
 	binman: binman {
@@ -732,13 +745,15 @@
 			#address-cells = <1>;
 			#size-cells = <0>;
 
-			protocol@10 {
-				reg = <0x10>;
+			pwrdom_scmi: protocol@11 {
+				reg = <0x11>;
+				#power-domain-cells = <1>;
 			};
 
 			clk_scmi: protocol@14 {
 				reg = <0x14>;
 				#clock-cells = <1>;
+				linaro,sandbox-channel-id = <0x14>;
 			};
 
 			reset_scmi: protocol@16 {
@@ -766,6 +781,10 @@
 					};
 				};
 			};
+		};
+
+		sm: secure-monitor {
+			compatible = "sandbox,sm";
 		};
 	};
 
@@ -974,7 +993,7 @@
 	};
 
 	wdt-gpio-toggle {
-		gpios = <&gpio_a 7 0>;
+		gpios = <&gpio_a 8 0>;
 		compatible = "linux,wdt-gpio";
 		hw_margin_ms = <100>;
 		hw_algo = "toggle";
@@ -1101,6 +1120,13 @@
 		filename = "mmc5.img";
 	};
 
+	/* This is used for mbr tests */
+	mmc6 {
+		status = "disabled";
+		compatible = "sandbox,mmc";
+		filename = "mmc6.img";
+	};
+
 	pch {
 		compatible = "sandbox,pch";
 	};
@@ -1123,8 +1149,8 @@
 		pci@1,0 {
 			compatible = "pci-generic";
 			/* reg 0 is at 0x14, using FDT_PCI_SPACE_MEM32 */
-			reg = <0x02000814 0 0 0 0
-			       0x01000810 0 0 0 0>;
+			reg = <0x02000814 0 0 0x80 0
+			       0x01000810 0 0 0xc0 0>;
 			sandbox,emul = <&swap_case_emul0_1>;
 		};
 		p2sb-pci@2,0 {
@@ -1151,7 +1177,7 @@
 		pci@1f,0 {
 			compatible = "pci-generic";
 			/* reg 0 is at 0x10, using FDT_PCI_SPACE_IO */
-			reg = <0x0100f810 0 0 0 0>;
+			reg = <0x0100f810 0 0 0x100 0>;
 			sandbox,emul = <&swap_case_emul0_1f>;
 		};
 	};
@@ -1422,6 +1448,7 @@
 
 	tpm2 {
 		compatible = "sandbox,tpm2";
+		memory-region = <&event_log>;
 	};
 
 	tpm {
@@ -1545,6 +1572,7 @@
 		other-node = "/some-bus/c-test@5";
 		int-values = <0x1937 72993>;
 		u-boot,acpi-ssdt-order = <&acpi_test2 &acpi_test1>;
+		stdout-path = "serial0:115200n8";
 		chosen-test {
 			compatible = "denx,u-boot-fdt-test";
 			reg = <9 1>;
@@ -1638,6 +1666,7 @@
 
 	sandbox_scmi {
 		compatible = "sandbox,scmi-devices";
+		power-domains = <&pwrdom_scmi 2>;
 		clocks = <&clk_scmi 2>, <&clk_scmi 0>;
 		resets = <&reset_scmi 3>;
 		regul0-supply = <&regul0_scmi>;

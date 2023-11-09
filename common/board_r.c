@@ -191,7 +191,7 @@ static int initr_malloc(void)
 {
 	ulong start;
 
-#if CONFIG_VAL(SYS_MALLOC_F_LEN)
+#if CONFIG_IS_ENABLED(SYS_MALLOC_F)
 	debug("Pre-reloc malloc() used %#lx bytes (%ld KB)\n", gd->malloc_ptr,
 	      gd->malloc_ptr / 1024);
 #endif
@@ -693,6 +693,7 @@ static init_fnc_t init_sequence_r[] = {
 #if defined(CONFIG_ID_EEPROM)
 	mac_read_from_eeprom,
 #endif
+	INITCALL_EVENT(EVT_SETTINGS_R),
 	INIT_FUNC_WATCHDOG_RESET
 #if defined(CONFIG_PCI_INIT_R) && !defined(CONFIG_SYS_EARLY_PCI_INIT)
 	/*

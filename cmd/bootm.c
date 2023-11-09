@@ -147,6 +147,8 @@ int do_bootm(struct cmd_tbl *cmdtp, int flag, int argc, char *const argv[])
 		BOOTM_STATE_OS_GO;
 	if (IS_ENABLED(CONFIG_SYS_BOOT_RAMDISK_HIGH))
 		states |= BOOTM_STATE_RAMDISK;
+	if (IS_ENABLED(CONFIG_MEASURED_BOOT))
+		states |= BOOTM_STATE_MEASURE;
 	if (IS_ENABLED(CONFIG_PPC) || IS_ENABLED(CONFIG_MIPS))
 		states |= BOOTM_STATE_OS_CMDLINE;
 	ret = do_bootm_states(cmdtp, flag, argc, argv, states, &images, 1);
@@ -168,8 +170,7 @@ int bootm_maybe_autostart(struct cmd_tbl *cmdtp, const char *cmd)
 	return 0;
 }
 
-#ifdef CONFIG_SYS_LONGHELP
-static char bootm_help_text[] =
+U_BOOT_LONGHELP(bootm,
 	"[addr [arg ...]]\n    - boot application image stored in memory\n"
 	"\tpassing arguments 'arg ...'; when booting a Linux kernel,\n"
 	"\t'arg' can be the address of an initrd image\n"
@@ -208,8 +209,7 @@ static char bootm_help_text[] =
 #if defined(CONFIG_TRACE)
 	"\tfake    - OS specific fake start without go\n"
 #endif
-	"\tgo      - start OS";
-#endif
+	"\tgo      - start OS");
 
 U_BOOT_CMD(
 	bootm,	CONFIG_SYS_MAXARGS,	1,	do_bootm,

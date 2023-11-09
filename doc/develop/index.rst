@@ -19,6 +19,7 @@ General
    security
    sending_patches
    system_configuration
+   ide_integration
 
 Implementation
 --------------
@@ -88,7 +89,7 @@ Refactoring
 
    checkpatch
    coccinelle
-   moveconfig
+   qconfig
 
 Code quality
 ------------

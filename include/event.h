@@ -105,6 +105,15 @@ enum event_t {
 	EVT_FSP_INIT_F,
 
 	/**
+	 * @EVT_SETTINGS_R:
+	 * This event is triggered post-relocation and before console init.
+	 * This gives an option to perform any platform-dependent setup, which
+	 * needs to take place before show_board_info() (e.g. readout of EEPROM
+	 * stored settings).
+	 */
+	EVT_SETTINGS_R,
+
+	/**
 	 * @EVT_LAST_STAGE_INIT:
 	 * This event is triggered just before jumping to the main loop.
 	 * Some boards need to perform initialisation immediately before control
@@ -282,9 +291,9 @@ static inline const char *event_spy_id(struct evspy_info *spy)
  * {
  *    return sandbox_early_getopt_check();
  * }
- * EVENT_SPY(EVT_MISC_INIT_F, sandbox_misc_init_f);
+ * EVENT_SPY_FULL(EVT_MISC_INIT_F, sandbox_misc_init_f);
  *
- * where EVENT_SPY uses ll_entry_declare()
+ * where EVENT_SPY_FULL uses ll_entry_declare()
  *
  * In this case, LTO decides to drop the sandbox_misc_init_f() function
  * (which is fine) but then drops the linker-list entry too. This means

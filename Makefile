@@ -1,9 +1,9 @@
 # SPDX-License-Identifier: GPL-2.0+
 
-VERSION = 2023
-PATCHLEVEL = 10
+VERSION = 2024
+PATCHLEVEL = 01
 SUBLEVEL =
-EXTRAVERSION =
+EXTRAVERSION = -rc2
 NAME =
 
 # *DOCUMENTATION*
@@ -886,7 +886,7 @@ libs-$(CONFIG_UT_ENV) += test/env/
 libs-$(CONFIG_UT_OPTEE) += test/optee/
 libs-$(CONFIG_UT_OVERLAY) += test/overlay/
 
-libs-y += $(if $(BOARDDIR),board/$(BOARDDIR)/)
+libs-y += $(if $(wildcard $(srctree)/board/$(BOARDDIR)/Makefile),board/$(BOARDDIR)/)
 
 libs-y := $(sort $(libs-y))
 
@@ -1287,7 +1287,7 @@ binary_size_check: u-boot-nodtb.bin FORCE
 	fi
 
 ifeq ($(CONFIG_INIT_SP_RELATIVE)$(CONFIG_OF_SEPARATE),yy)
-ifneq ($(CONFIG_SYS_MALLOC_F_LEN),)
+ifneq ($(CONFIG_SYS_MALLOC_F),)
 subtract_sys_malloc_f_len = space=$$(($${space} - $(CONFIG_SYS_MALLOC_F_LEN)))
 else
 subtract_sys_malloc_f_len = true
@@ -1831,7 +1831,7 @@ quiet_cmd_envc = ENVC    $@
 		touch $@ ; \
 	fi
 
-include/generated/env.txt: $(wildcard $(ENV_FILE))
+include/generated/env.txt: $(wildcard $(ENV_FILE)) include/generated/autoconf.h
 	$(call cmd,envc)
 
 # Write out the resulting environment, converted to a C string
@@ -2156,16 +2156,16 @@ CLEAN_DIRS  += $(MODVERDIR) \
 	       $(foreach d, spl tpl vpl, $(patsubst %,$d/%, \
 			$(filter-out include, $(shell ls -1 $d 2>/dev/null))))
 
-CLEAN_FILES += include/bmp_logo.h include/bmp_logo_data.h \
-	       include/generated/env.* drivers/video/u_boot_logo.S \
+CLEAN_FILES += include/autoconf.mk* include/bmp_logo.h include/bmp_logo_data.h \
+	       include/config.h include/generated/env.* drivers/video/u_boot_logo.S \
 	       tools/version.h u-boot* MLO* SPL System.map fit-dtb.blob* \
 	       u-boot-ivt.img.log u-boot-dtb.imx.log SPL.log u-boot.imx.log \
 	       lpc32xx-* bl31.c bl31.elf bl31_*.bin image.map tispl.bin* \
 	       idbloader.img flash.bin flash.log defconfig keep-syms-lto.c \
 	       mkimage-out.spl.mkimage mkimage.spl.mkimage imx-boot.map \
 	       itb.fit.fit itb.fit.itb itb.map spl.map mkimage-out.rom.mkimage \
-	       mkimage.rom.mkimage rom.map simple-bin.map simple-bin-spi.map \
-	       idbloader-spi.img lib/efi_loader/helloworld_efi.S
+	       mkimage.rom.mkimage mkimage-in-simple-bin* rom.map simple-bin* \
+	       idbloader-spi.img lib/efi_loader/helloworld_efi.S *.itb
 
 # Directories & files removed with 'make mrproper'
 MRPROPER_DIRS  += include/config include/generated spl tpl vpl \
@@ -2447,7 +2447,7 @@ cmd_genenv = \
 	sed -e '/^\s*$$/d' | \
 	sort -t '=' -k 1,1 -s -o $@
 
-u-boot-initial-env: $(env_h) FORCE
+u-boot-initial-env: scripts_basic $(env_h) FORCE
 	$(Q)$(MAKE) $(build)=tools $(objtree)/tools/printinitialenv
 	$(call if_changed,genenv)
 
