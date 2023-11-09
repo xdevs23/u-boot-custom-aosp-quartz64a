@@ -32,9 +32,10 @@ CONFIG_FIT_VERBOSE=y
 CONFIG_SPL_FIT_SIGNATURE=y
 CONFIG_SPL_LOAD_FIT=y
 CONFIG_LEGACY_IMAGE_FORMAT=y
-CONFIG_BOOTDELAY=0
-CONFIG_BOOTCOMMAND="version"
+CONFIG_BOOTDELAY=1
+CONFIG_BOOTCOMMAND="echo Starting AOSP boot sequence && env set devnum 0 && mmc dev $devnum && echo Reading boot... && part start mmc $devnum boot boot_start && part size mmc $devnum boot boot_size && mmc read $loadaddr $boot_start $boot_size && echo Reading dtbo... && abootimg get dtb_load_addr dtboaddr && part start mmc $devnum dtbo dtbo_start && part size mmc $devnum dtbo dtbo_size && mmc read $dtboaddr $dtbo_start $dtbo_size && echo Copying dtb... && abootimg get dtb --index=0 dtb0_start dtb0_size && env set fdtaddr 0x600000 && cp.b $dtb0_start $fdtaddr $dtb0_size && echo Merging DTB... && fdt addr $fdtaddr 0x100000 && adtimg addr $dtboaddr && adtimg get dt --index=0 dtbo0_addr && fdt apply $dtbo0_addr && echo Booting AOSP... && bootm $loadaddr $loadaddr $fdtaddr"
 CONFIG_DEFAULT_FDT_FILE="rockchip/rk3566-quartz64-a.dtb"
+CONFIG_LOGLEVEL=7
 # CONFIG_DISPLAY_CPUINFO is not set
 CONFIG_DISPLAY_BOARDINFO_LATE=y
 CONFIG_LAST_STAGE_INIT=y
@@ -52,7 +53,6 @@ CONFIG_SYS_SPI_U_BOOT_OFFS=0x60000
 CONFIG_SPL_ATF=y
 # CONFIG_CMD_BOOTD is not set
 # CONFIG_CMD_BOOTFLOW is not set
-# CONFIG_BOOTM_LINUX is not set
 # CONFIG_BOOTM_NETBSD is not set
 # CONFIG_BOOTM_PLAN9 is not set
 # CONFIG_BOOTM_RTEMS is not set
@@ -117,5 +117,6 @@ CONFIG_SYS_NS16550_MEM32=y
 CONFIG_ROCKCHIP_SFC=y
 CONFIG_SYSRESET=y
 CONFIG_REGEX=y
+CONFIG_LIBAVB=y
 CONFIG_ERRNO_STR=y
 # CONFIG_EFI_LOADER is not set
