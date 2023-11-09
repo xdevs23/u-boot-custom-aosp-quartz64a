@@ -53,7 +53,15 @@
 	"partitions=" PARTS_DEFAULT \
 	ROCKCHIP_DEVICE_SETTINGS \
 	"boot_targets=" BOOT_TARGETS "\0"
-
+	BOOTENV \
+	"importbootenv="                                         \
+		"if mmc dev 0 0; then if mmc dev 1 0; then; else"    \
+			"if mmc read ${kernel_addr_r} 0x1fc0 0x40; then" \
+				"env import -b ${kernel_addr_r};"            \
+				"echo Loaded environment from MMC0;"         \
+			"fi; "                                           \
+		"fi; "                                               \
+	"distro_bootcmd=$distro_bootcmd; run importbootenv;\0"
 #endif
 
 #endif

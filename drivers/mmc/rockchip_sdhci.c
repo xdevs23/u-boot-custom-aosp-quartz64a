@@ -578,7 +578,15 @@ static int rockchip_sdhci_probe(struct udevice *dev)
 	}
 
 	host->ops = &rockchip_sdhci_ops;
-	host->quirks = SDHCI_QUIRK_WAIT_SEND_CMD;
+	host->quirks = SDHCI_QUIRK_WAIT_SEND_CMD |
+		SDHCI_QUIRK_BROKEN_HISPD_MODE;
+	/*
+	 * The sdhci-driver only supports 4bit and 8bit, as sdhci_setup_cfg
+	 * doesn't allow us to clear MMC_MODE_4BIT.  Consequently, we don't
+	 * check for other bus-width values.
+	 */
+	if (host->bus_width == 8)
+		host->host_caps |= MMC_MODE_8BIT;
 
 	host->mmc = &plat->mmc;
 	host->mmc->priv = &priv->host;

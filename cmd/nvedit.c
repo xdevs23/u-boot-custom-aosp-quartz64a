@@ -44,6 +44,30 @@
 
 DECLARE_GLOBAL_DATA_PTR;
 
+#if	defined(CONFIG_ENV_IS_IN_EEPROM)	|| \
+	defined(CONFIG_ENV_IS_IN_FLASH)		|| \
+	defined(CONFIG_ENV_IS_IN_MMC)		|| \
+	defined(CONFIG_ENV_IS_IN_FAT)		|| \
+	defined(CONFIG_ENV_IS_IN_EXT4)		|| \
+	defined(CONFIG_ENV_IS_IN_NAND)		|| \
+	defined(CONFIG_ENV_IS_IN_NVRAM)		|| \
+	defined(CONFIG_ENV_IS_IN_ONENAND)	|| \
+	defined(CONFIG_ENV_IS_IN_RAW_DISK)	|| \
+	defined(CONFIG_ENV_IS_IN_SATA)		|| \
+	defined(CONFIG_ENV_IS_IN_SPI_FLASH)	|| \
+	defined(CONFIG_ENV_IS_IN_REMOTE)	|| \
+	defined(CONFIG_ENV_IS_IN_UBI)
+
+#define ENV_IS_IN_DEVICE
+
+#endif
+
+#if	!defined(ENV_IS_IN_DEVICE)		&& \
+	!defined(CONFIG_ENV_IS_NOWHERE)
+# error Define one of CONFIG_ENV_IS_IN_{EEPROM|FLASH|MMC|FAT|EXT4|\
+NAND|NVRAM|ONENAND|SATA|SPI_FLASH|REMOTE|UBI} or CONFIG_ENV_IS_NOWHERE
+#endif
+
 /*
  * Maximum expected input data size for import command
  */
