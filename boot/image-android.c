@@ -213,6 +213,10 @@ static ulong android_image_get_kernel_addr(struct andr_image_data *img_data)
 	if (img_data->kernel_addr == 0 && img_data->ramdisk_addr == 0)
 		return env_get_ulong("kernel_addr_r", 16, 0);
 
+	ulong fixed_addr = env_get_ulong("kernel_load_addr", 16, 0);
+	if (fixed_addr)
+		return fixed_addr;
+
 	return img_data->kernel_addr;
 }
 
