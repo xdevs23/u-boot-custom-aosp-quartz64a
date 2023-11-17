@@ -207,20 +207,6 @@ bool android_image_get_data(const void *boot_hdr, const void *vendor_boot_hdr,
 static ulong android_image_get_kernel_addr(struct andr_image_data *img_data)
 {
 	/*
-	 * All the Android tools that generate a boot.img use this
-	 * address as the default.
-	 *
-	 * Even though it doesn't really make a lot of sense, and it
-	 * might be valid on some platforms, we treat that adress as
-	 * the default value for this field, and try to execute the
-	 * kernel in place in such a case.
-	 *
-	 * Otherwise, we will return the actual value set by the user.
-	 */
-	if (img_data->kernel_addr  == ANDROID_IMAGE_DEFAULT_KERNEL_ADDR)
-		return img_data->kernel_ptr;
-
-	/*
 	 * abootimg creates images where all load addresses are 0
 	 * and we need to fix them.
 	 */
