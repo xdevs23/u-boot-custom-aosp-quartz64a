@@ -37,7 +37,7 @@ CONFIG_BOOTSTD_BOOTCOMMAND=y
 CONFIG_LEGACY_IMAGE_FORMAT=y
 CONFIG_DISTRO_DEFAULTS=y
 CONFIG_BOOTDELAY=1
-CONFIG_BOOTCOMMAND="echo Starting AOSP boot sequence && env set kernel_load_addr 0x10000000 && env set adtb_idx 80 && env set devnum 0 && env set loadaddr 0x1ff800 && env set vendor_loadaddr 0x41ff800 && mmc dev $devnum && part start mmc $devnum boot boot_start && part size mmc $devnum boot boot_size && mmc read $loadaddr $boot_start $boot_size && part start mmc $devnum vendor_boot vendor_boot_start && part size mmc $devnum vendor_boot vendor_boot_size && mmc read $vendor_loadaddr $vendor_boot_start $vendor_boot_size && abootimg addr $loadaddr $vendor_loadaddr && abootimg get dtb --index=$adtb_idx dtb0_start dtb0_size && fdt move $dtb0_start $fdtaddr $dtb0_size && echo Booting AOSP... && bootm $loadaddr $loadaddr $fdtaddr"
+CONFIG_BOOTCOMMAND="echo Starting AOSP boot sequence && env set kernel_load_addr 0x10000000 && env set loadaddr 0x1ff800 && env set vendor_loadaddr 0x41ff800 && env set adtb_idx 80 && env set boot_targets '0 1' && for target in ${boot_targets}; do env set devnum $target; if mmc dev $devnum; then part start mmc $devnum boot boot_start && part size mmc $devnum boot boot_size && mmc read $loadaddr $boot_start $boot_size && part start mmc $devnum vendor_boot vendor_boot_start && part size mmc $devnum vendor_boot vendor_boot_size && mmc read $vendor_loadaddr $vendor_boot_start $vendor_boot_size && abootimg addr $loadaddr $vendor_loadaddr && abootimg get dtb --index=$adtb_idx dtb0_start dtb0_size && fdt move $dtb0_start $fdtaddr $dtb0_size && echo Booting AOSP... && bootm $loadaddr $loadaddr $fdtaddr; fi; done"
 CONFIG_DEFAULT_FDT_FILE="rockchip/rk3566-quartz64-a.dtb"
 CONFIG_LOGLEVEL=7
 CONFIG_CONSOLE_FLUSH_ON_NEWLINE=y
