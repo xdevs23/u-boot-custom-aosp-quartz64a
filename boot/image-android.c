@@ -550,8 +550,10 @@ static bool android_image_get_dtb_img_addr(ulong hdr_addr, ulong vhdr_addr, ulon
 		/* Calculate the address of DTB area in boot image */
 		dtb_img_addr = vhdr_addr;
 		dtb_img_addr += v_hdr->page_size;
-		if (v_hdr->vendor_ramdisk_size)
+		if (v_hdr->vendor_ramdisk_size) {
 			dtb_img_addr += ALIGN(v_hdr->vendor_ramdisk_size, v_hdr->page_size);
+			dtb_img_addr += v_hdr->page_size;
+		}
 		*addr = dtb_img_addr;
 		unmap_sysmem(v_hdr);
 		goto exit;
