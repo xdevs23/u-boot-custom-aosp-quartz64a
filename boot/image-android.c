@@ -383,25 +383,55 @@ int android_image_get_ramdisk(const void *hdr, const void *vendor_boot_img,
 		*rd_data = *rd_len = 0;
 		return -1;
 	}
+
+	printf(
+		"Android ramdisk information:\n"
+		"ramdisk_ptr: 0x%lx\n"
+		"ramdisk_addr: 0x%lx\n"
+		"ramdisk_size: 0x%x\n"
+		"boot_ramdisk_size: 0x%x\n"
+		"vendor_ramdisk_ptr: 0x%lx\n"
+		"vendor_ramdisk_size: 0x%x\n"
+		"bootconfig_addr: 0x%lx\n"
+		"bootconfig_size: 0x%lx\n",
+		img_data.ramdisk_ptr, img_data.ramdisk_addr, img_data.ramdisk_size,
+		img_data.boot_ramdisk_size, img_data.vendor_ramdisk_ptr,
+		img_data.vendor_ramdisk_size, img_data.bootconfig_addr, img_data.bootconfig_size
+	);
+
+	printf(
+		"Other Android image details:\n"
+		"kernel_addr: 0x%x\n"
+		"kernel_ptr: 0x%lx\n"
+		"kernel_size: 0x%x\n"
+		"dtb_ptr: 0x%lx\n"
+		"dtb_size: 0x%x\n",
+		img_data.kernel_addr, img_data.kernel_ptr, img_data.kernel_size,
+		img_data.dtb_ptr, img_data.dtb_size
+	);
+
 	if (img_data.header_version > 2) {
 		ramdisk_ptr = img_data.ramdisk_ptr;
-		// First copy ramdisk, then vendor ramdisk even though the order is the other way around
-		// This avoids overwriting the regular ramdisk with the vendor ramdisk
-		printf("%s: Copying ramdisk from 0x%lx to 0x%lx (size %x)\n",
-			__func__, img_data.ramdisk_ptr, (ramdisk_ptr + img_data.vendor_ramdisk_size), img_data.boot_ramdisk_size);
-		memcpy((void *)(ramdisk_ptr + img_data.vendor_ramdisk_size),
-		       (void *)img_data.ramdisk_ptr,
-		       img_data.boot_ramdisk_size);
+		ulong boot_ramdisk_addr = ALIGN(img_data.kernel_ptr + img_data.kernel_size, 0x1000);
+		ulong boot_ramdisk_offset = env_get_ulong("ramdisk_offset", 16, 0);
+		void* boot_ramdisk_ptr = (void *)(boot_ramdisk_addr + boot_ramdisk_offset);
+		ulong boot_ramdisk_size = img_data.boot_ramdisk_size;
 		ulong vendor_ramdisk_offset = env_get_ulong("vendor_ramdisk_offset", 16, 0);
 		void* vendor_ramdisk_ptr = (void *)(img_data.vendor_ramdisk_ptr + vendor_ramdisk_offset);
-		ulong vendor_ramdisk_size = img_data.vendor_ramdisk_size - vendor_ramdisk_offset;
-		printf("%s: Copying vendor ramdisk from %p to 0x%lx (size %lx)\n", __func__, vendor_ramdisk_ptr, ramdisk_ptr, vendor_ramdisk_size);
+		ulong vendor_ramdisk_size = img_data.vendor_ramdisk_size;
+
+		printf("%s: Copying vendor ramdisk from 0x%p to 0x%p (size %lx)\n",
+			__func__, vendor_ramdisk_ptr, (void*) ramdisk_ptr, vendor_ramdisk_size);
 		memcpy((void *)(ramdisk_ptr), (void *)vendor_ramdisk_ptr, vendor_ramdisk_size);
+
+		printf("%s: Copying boot ramdisk from 0x%p to 0x%p (size %lx)\n",
+			__func__, (void*) boot_ramdisk_ptr, (void*) (ramdisk_ptr + vendor_ramdisk_size), boot_ramdisk_size);
+		memcpy((void *)(ramdisk_ptr + vendor_ramdisk_size), (void*) boot_ramdisk_ptr, boot_ramdisk_size);
+
 		if (img_data.bootconfig_size) {
 			printf("%s: Copying bootconfig\n", __func__);
 			memcpy((void *)
-			       (ramdisk_ptr + img_data.vendor_ramdisk_size +
-			       img_data.boot_ramdisk_size),
+			       (ramdisk_ptr + vendor_ramdisk_size + boot_ramdisk_size),
 			       (void *)img_data.bootconfig_addr,
 			       img_data.bootconfig_size);
 		}
