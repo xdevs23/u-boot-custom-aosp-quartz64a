@@ -385,12 +385,20 @@ int android_image_get_ramdisk(const void *hdr, const void *vendor_boot_img,
 	}
 	if (img_data.header_version > 2) {
 		ramdisk_ptr = img_data.ramdisk_ptr;
-		memcpy((void *)(ramdisk_ptr), (void *)img_data.vendor_ramdisk_ptr,
-		       img_data.vendor_ramdisk_size);
+		// First copy ramdisk, then vendor ramdisk even though the order is the other way around
+		// This avoids overwriting the regular ramdisk with the vendor ramdisk
+		printf("%s: Copying ramdisk from 0x%lx to 0x%lx (size %x)\n",
+			__func__, img_data.ramdisk_ptr, (ramdisk_ptr + img_data.vendor_ramdisk_size), img_data.boot_ramdisk_size);
 		memcpy((void *)(ramdisk_ptr + img_data.vendor_ramdisk_size),
 		       (void *)img_data.ramdisk_ptr,
 		       img_data.boot_ramdisk_size);
+		ulong vendor_ramdisk_offset = env_get_ulong("vendor_ramdisk_offset", 16, 0);
+		void* vendor_ramdisk_ptr = (void *)(img_data.vendor_ramdisk_ptr + vendor_ramdisk_offset);
+		ulong vendor_ramdisk_size = img_data.vendor_ramdisk_size - vendor_ramdisk_offset;
+		printf("%s: Copying vendor ramdisk from %p to 0x%lx (size %lx)\n", __func__, vendor_ramdisk_ptr, ramdisk_ptr, vendor_ramdisk_size);
+		memcpy((void *)(ramdisk_ptr), (void *)vendor_ramdisk_ptr, vendor_ramdisk_size);
 		if (img_data.bootconfig_size) {
+			printf("%s: Copying bootconfig\n", __func__);
 			memcpy((void *)
 			       (ramdisk_ptr + img_data.vendor_ramdisk_size +
 			       img_data.boot_ramdisk_size),
