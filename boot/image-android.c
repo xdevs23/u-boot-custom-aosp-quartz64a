@@ -104,7 +104,8 @@ static void android_vendor_boot_image_v3_v4_parse_hdr(const struct andr_vnd_boot
 	end = (ulong)hdr;
 	end += hdr->page_size;
 	if (hdr->vendor_ramdisk_size) {
-		data->vendor_ramdisk_ptr = end;
+		end += hdr->page_size;
+		data->vendor_ramdisk_ptr = ALIGN(end, hdr->page_size);
 		data->vendor_ramdisk_size = hdr->vendor_ramdisk_size;
 		data->ramdisk_size += hdr->vendor_ramdisk_size;
 		end += ALIGN(hdr->vendor_ramdisk_size, hdr->page_size);
