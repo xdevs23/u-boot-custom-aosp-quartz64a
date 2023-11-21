@@ -414,11 +414,8 @@ int android_image_get_ramdisk(const void *hdr, const void *vendor_boot_img,
 	if (img_data.header_version > 2) {
 		ramdisk_ptr = img_data.ramdisk_ptr;
 		ulong boot_ramdisk_addr = ALIGN(img_data.kernel_ptr + img_data.kernel_size, 0x1000);
-		ulong boot_ramdisk_offset = env_get_ulong("ramdisk_offset", 16, 0);
-		void* boot_ramdisk_ptr = (void *)(boot_ramdisk_addr + boot_ramdisk_offset);
 		ulong boot_ramdisk_size = img_data.boot_ramdisk_size;
-		ulong vendor_ramdisk_offset = env_get_ulong("vendor_ramdisk_offset", 16, 0);
-		void* vendor_ramdisk_ptr = (void *)(img_data.vendor_ramdisk_ptr + vendor_ramdisk_offset);
+		void* vendor_ramdisk_ptr = (void *)(img_data.vendor_ramdisk_ptr);
 		ulong vendor_ramdisk_size = img_data.vendor_ramdisk_size;
 
 		printf("%s: Copying vendor ramdisk from 0x%p to 0x%p (size %lx)\n",
@@ -426,8 +423,8 @@ int android_image_get_ramdisk(const void *hdr, const void *vendor_boot_img,
 		memcpy((void *)(ramdisk_ptr), (void *)vendor_ramdisk_ptr, vendor_ramdisk_size);
 
 		printf("%s: Copying boot ramdisk from 0x%p to 0x%p (size %lx)\n",
-			__func__, (void*) boot_ramdisk_ptr, (void*) (ramdisk_ptr + vendor_ramdisk_size), boot_ramdisk_size);
-		memcpy((void *)(ramdisk_ptr + vendor_ramdisk_size), (void*) boot_ramdisk_ptr, boot_ramdisk_size);
+			__func__, (void*) boot_ramdisk_addr, (void*) (ramdisk_ptr + vendor_ramdisk_size), boot_ramdisk_size);
+		memcpy((void *)(ramdisk_ptr + vendor_ramdisk_size), (void*) boot_ramdisk_addr, boot_ramdisk_size);
 
 		if (img_data.bootconfig_size) {
 			printf("%s: Copying bootconfig\n", __func__);
